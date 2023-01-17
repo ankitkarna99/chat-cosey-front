@@ -23,6 +23,36 @@ const DashboardPage = (props) => {
     getChatrooms();
     // eslint-disable-next-line
   }, []);
+  
+  const createChatroom = () => {
+    const chatroomName = chatroomNameRef.current.value;
+
+    axios
+      .post("http://localhost:8000/chatroom", {
+        name: chatroomName,
+      }, {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("CC_Token"),
+        },
+      })
+      .then((response) => {
+        makeToast("success", response.data.message);
+        getChatrooms();
+        chatroomNameRef.current.value = "";
+      })
+      .catch((err) => {
+        // console.log(err);
+        if (
+          err &&
+          err.response &&
+          err.response.data &&
+          err.response.data.message
+        )
+          makeToast("error", err.response.data.message);
+      });
+  };
+  
+  const chatroomNameRef = React.createRef();
 
   return (
     <div className="card">
@@ -34,11 +64,12 @@ const DashboardPage = (props) => {
             type="text"
             name="chatroomName"
             id="chatroomName"
+            ref={chatroomNameRef}
             placeholder="ChatterBox Nepal"
           />
         </div>
       </div>
-      <button>Create Chatroom</button>
+      <button onClick={createChatroom}>Create Chatroom</button>
       <div className="chatrooms">
         {chatrooms.map((chatroom) => (
           <div key={chatroom._id} className="chatroom">
